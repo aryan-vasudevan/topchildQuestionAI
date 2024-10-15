@@ -3,6 +3,11 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 
+class Question():
+    def __init__(self, question, answerChoices, correctAnswer):
+        self.question = question
+        self.answerChoices = answerChoices
+        self.correctAnswer = correctAnswer
 # Excel file
 path = "questions.xlsx" # path to the excel file
 wb = openpyxl.load_workbook(path) # load the workbook
