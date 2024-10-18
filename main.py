@@ -22,7 +22,7 @@ def getNewQuestion(sampleQuestion):
     completion = client.beta.chat.completions.parse(
         model="gpt-4o-2024-08-06",
         messages=[{"role": "system", "content": PROMPT},
-                  {"role": "user", "content": f"question - {sampleQuestion.question} \n answer choices - {sampleQuestion.answerChoices} \n correct answer - {sampleQuestion.correctAnswer}"}],
+                  {"role": "user", "content": f"question - {sampleQuestion.questionText} \n answer choices - {sampleQuestion.answerChoices} \n correct answer - {sampleQuestion.correctAnswer}"}],
         response_format=Question
     )
 
@@ -44,4 +44,6 @@ for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
 
     sampleQuestions.append(Question(questionText=questionText, answerChoices=answerChoices, correctAnswer=correctAnswer))
 
-getNewQuestion(sampleQuestions[0])
+for sq in sampleQuestions:
+    newQuestion = getNewQuestion(sq)
+    print(f"\nquestion - {newQuestion.questionText}\nanswerChoices - {newQuestion.answerChoices} \ncorrectAnswer - {newQuestion.correctAnswer}")
