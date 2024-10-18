@@ -13,7 +13,7 @@ class Question():
 path = "questions.xlsx" # path to the excel file
 wb = openpyxl.load_workbook(path) # load the workbook
 
-sheet = wb.active  
+sheet = wb.active
 
 # API
 load_dotenv()
@@ -27,4 +27,7 @@ for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
     correctAnswer = row[6].value
     questions.append(Question(question, answerChoices, correctAnswer))
 
-print(questions[0].question, questions[0].answerChoices, questions[0].correctAnswer)
+# Pass in each question to the prompt
+newQuestions = []
+for oldQuestion in questions:
+    pass
