@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 class Question(BaseModel):
     question: str
-    answerChoices: str
+    answerChoices: list[str]
     correctAnswer: str
 
 # Excel file
@@ -22,39 +22,19 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 
 questions = []
 for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
-    question = row[0].value
-    answerChoices = [cell.value for cell in row[1:6]]
-    correctAnswer = row[6].value
-    questions.append(Question(question, answerChoices, correctAnswer))
+    question = str(row[0].value)
+    answerChoices = [str(cell.value) for cell in row[1:6]]
+    correctAnswer = str(row[6].value)
 
-response = client.chat.completions.create(
+    questions.append(Question(question=question, answerChoices=answerChoices, correctAnswer=correctAnswer))
+
+completion = client.beta.chat.completions.parse(
     model="gpt-4o-2024-08-06",
     messages=[
-        {
-            "role": "system", 
-            "content": "You extract email addresses into JSON data."
-        },
-        {
-            "role": "user", 
-            "content": "Feeling stuck? Send a message to help@mycompany.com."
-        }
+        {"role": "system", "content": "You will create similar questions to the ones passed in. You must provide also provide 4 answer choices, one of them always being none of the above, as well as a correct answer wich is one of the 4."},
+        {"role": "system", "content": f"question - {questions[0].question} \n answer choices - {questions[0].answerChoices} \n correct answer - {questions[0].correctAnswer}"}
     ],
-    response_format={
-        "type": "json_schema",
-        "json_schema": {
-            "name": "email_schema",
-            "schema": {
-                "type": "object",
-                "properties": {
-                    "email": {
-                        "description": "The email address that appears in the input",
-                        "type": "string"
-                    },
-                    "additionalProperties": False
-                }
-            }
-        }
-    }
+    response_format=Question,
 )
 
-print(response.choices[0].message.content);
+print(completion.choices[0].message.content);
