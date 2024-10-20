@@ -47,3 +47,6 @@ for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
 for sq in sampleQuestions:
     newQuestion = getNewQuestion(sq)
     print(f"\nquestion - {newQuestion.questionText}\nanswerChoices - {newQuestion.answerChoices} \ncorrectAnswer - {newQuestion.correctAnswer}")
+
+# Create new sheet
+wb.create_sheet("sheet 2")
