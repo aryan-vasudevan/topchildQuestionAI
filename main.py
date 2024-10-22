@@ -7,7 +7,7 @@ from pydantic import BaseModel
 # Initialize API
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-INSTRUCTIONS = os.getenv("PROMPT")
+INSTRUCTIONS = os.getenv("INSTRUCTIONS")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -36,7 +36,7 @@ wb = openpyxl.load_workbook(path)
 sheet = wb.active
 
 # Read questions
-sampleQuestions = []
+sampleQuestionList = []
 for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
     # Read specific cells
     questionText = str(row[0].value)
@@ -44,12 +44,14 @@ for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
     correctAnswer = str(row[6].value)
 
     # Keep questions in model form to keep it organized
-    sampleQuestions.append(Question(questionText=questionText, answerChoices=answerChoices, correctAnswer=correctAnswer))
+    sampleQuestionList.append(Question(questionText=questionText, answerChoices=answerChoices, correctAnswer=correctAnswer))
 
 # Get a new question for each sample question
-for sq in sampleQuestions:
-    newQuestion = getNewQuestion(sq)
+newQuestionList = []
+for sampleQuestion in sampleQuestionList:
+    newQuestion = getNewQuestion(sampleQuestion)
     print(f"\nquestion - {newQuestion.questionText}\nanswerChoices - {newQuestion.answerChoices} \ncorrectAnswer - {newQuestion.correctAnswer}")
 
 # Create new sheet
 wb.create_sheet("Sheet 2")
+wb.save(path)
