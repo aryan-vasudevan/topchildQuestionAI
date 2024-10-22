@@ -33,7 +33,12 @@ def getNewQuestion(sampleQuestion):
 path = "questions.xlsx"
 wb = openpyxl.load_workbook(path)
 
+# Sample question sheet
 sheet = wb.active
+
+# New question sheet
+wb.create_sheet("Sheet 2")
+sheet2 = wb["Sheet 2"]
 
 # Read questions
 sampleQuestionList = []
@@ -47,11 +52,18 @@ for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
     sampleQuestionList.append(Question(questionText=questionText, answerChoices=answerChoices, correctAnswer=correctAnswer))
 
 # Get a new question for each sample question
-newQuestionList = []
-for sampleQuestion in sampleQuestionList:
+for rowNumber, sampleQuestion in enumerate(sampleQuestionList):
     newQuestion = getNewQuestion(sampleQuestion)
-    print(f"\nquestion - {newQuestion.questionText}\nanswerChoices - {newQuestion.answerChoices} \ncorrectAnswer - {newQuestion.correctAnswer}")
+    row  = sheet2[rowNumber + 1] # Row index starts at 1
 
-# Create new sheet
-wb.create_sheet("Sheet 2")
+    # Write question text
+    row[0].value = newQuestion.questionText
+
+    # Write answer choices
+    for i in range(1, 6):
+        row[i].value = newQuestion.answerChoices[i - 1]
+
+    # Write correct answer
+    row[6].value = newQuestion.correctAnswer
+
 wb.save(path)
