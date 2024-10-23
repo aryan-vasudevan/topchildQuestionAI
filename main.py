@@ -53,17 +53,17 @@ for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
 
 # Get a new question for each sample question
 for rowNumber, sampleQuestion in enumerate(sampleQuestionList):
+    rowNumber += 1
     newQuestion = getNewQuestion(sampleQuestion)
-    row  = sheet2[rowNumber + 1] # Row index starts at 1
 
     # Write question text
-    row[0].value = newQuestion.questionText
-
+    sheet2.cell(row=rowNumber, column=1).value = newQuestion.questionText
+    
     # Write answer choices
     for i in range(1, 6):
-        row[i].value = newQuestion.answerChoices[i - 1]
+        sheet2.cell(row=rowNumber, column=i).value = newQuestion.answerChoices[i - 1]
 
     # Write correct answer
-    row[6].value = newQuestion.correctAnswer
+    sheet2.cell(row=rowNumber, column=6).value = newQuestion.correctAnswer
 
 wb.save(path)
