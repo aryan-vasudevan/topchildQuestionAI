@@ -60,9 +60,10 @@ run = client.beta.threads.runs.create_and_poll(
 )
 
 if run.status == 'completed': 
-  messages = client.beta.threads.messages.list(
-    thread_id=thread.id
-  )
-  print(messages)
+  messages = list(client.beta.threads.messages.list(
+    thread_id=thread.id,
+    run_id=run.id
+  ))
+  print(messages[0].content[0].text)
 else:
   print(run.status)
