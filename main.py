@@ -13,10 +13,16 @@ INSTRUCTIONS = os.getenv("INSTRUCTIONS")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Question model for structured outputs
-class Question(BaseModel):
+class SampleQuestion(BaseModel):
     questionText: str
     answerChoices: list[str]
     correctAnswer: str
+
+class NewQuestion(BaseModel):
+    questionText: str
+    answerChoices: list[str]
+    correctAnswer: str
+    explanation: str
 
 # Get new question
 thread = client.beta.threads.create()
@@ -38,7 +44,7 @@ def getNewQuestion(sampleQuestion, questionJSONList):
             thread_id=thread.id,
     ))
     questionJSON = messages[0].content[0].text.value
-    print(questionJSON)
+    
     questionJSONList.append(questionJSON)
 # Excel file
 path = "questions.xlsx"
@@ -60,7 +66,7 @@ for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
     correctAnswer = str(row[6].value)
 
     # Keep questions in model form to keep it organized
-    sampleQuestionList.append(Question(questionText=questionText, answerChoices=answerChoices, correctAnswer=correctAnswer))
+    sampleQuestionList.append(SampleQuestion(questionText=questionText, answerChoices=answerChoices, correctAnswer=correctAnswer))
 
 # Get a new question for each sample question
 questionJSONList = []
@@ -71,11 +77,13 @@ newQuestionList = []
 for questionJSON in questionJSONList:
     questionObj = json.loads(questionJSON)
 
-    newQuestion = Question(questionText=questionObj["questionText"], answerChoices=questionObj["answerChoices"], correctAnswer=questionObj["correctAnswer"])
+    newQuestion = NewQuestion(questionText=questionObj["questionText"], answerChoices=questionObj["answerChoices"], correctAnswer=questionObj["correctAnswer"], explanation=questionObj["explanation"])
     newQuestionList.append(newQuestion)
 
 for rowNumber, newQuestion in enumerate(newQuestionList):
     rowNumber += 1
+
+    print(newQuestion.explanation)
 
     # Write question text
     sheet2.cell(row=rowNumber, column=1).value = newQuestion.questionText
@@ -86,5 +94,8 @@ for rowNumber, newQuestion in enumerate(newQuestionList):
 
     # Write correct answer
     sheet2.cell(row=rowNumber, column=7).value = newQuestion.correctAnswer
+
+    # Write explanation
+    sheet2.cell(row=rowNumber, column=7).value = newQuestion.explanation
 
 wb.save(path)
