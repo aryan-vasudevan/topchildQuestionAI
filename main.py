@@ -18,16 +18,28 @@ class Question(BaseModel):
     answerChoices: list[str]
     correctAnswer: str
 
-thread = client.beta.threads.create()
-
 # Get new question
-def addNewQuestion(sampleQuestion):
+thread = client.beta.threads.create()
+def getNewQuestion(sampleQuestion, questionJSONList):
+
     message = client.beta.threads.messages.create(
         thread_id=thread.id,
         role="user",
         content=f"question - {sampleQuestion.questionText} \n answer choices - {sampleQuestion.answerChoices} \n correct answer - {sampleQuestion.correctAnswer}"
     )
 
+    run = client.beta.threads.runs.create_and_poll(
+        thread_id=thread.id,
+        assistant_id="asst_JvXYRQsCuulfT0rGke7VZA0D",
+    )
+
+    if run.status == "completed": 
+        messages = list(client.beta.threads.messages.list(
+            thread_id=thread.id,
+    ))
+    questionJSON = messages[0].content[0].text.value
+    print(questionJSON)
+    questionJSONList.append(questionJSON)
 # Excel file
 path = "questions.xlsx"
 wb = openpyxl.load_workbook(path)
@@ -51,27 +63,13 @@ for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
     sampleQuestionList.append(Question(questionText=questionText, answerChoices=answerChoices, correctAnswer=correctAnswer))
 
 # Get a new question for each sample question
-for rowNumber, sampleQuestion in enumerate(sampleQuestionList):
-    rowNumber += 1
-    addNewQuestion(sampleQuestion)
-
-run = client.beta.threads.runs.create_and_poll(
-    thread_id=thread.id,
-    assistant_id="asst_JvXYRQsCuulfT0rGke7VZA0D",
-)
+questionJSONList = []
+for sampleQuestion in sampleQuestionList:
+    getNewQuestion(sampleQuestion, questionJSONList)
 
 newQuestionList = []
-if run.status == "completed": 
-    messages = list(client.beta.threads.messages.list(
-    thread_id=thread.id,
-    run_id=run.id
-    ))
+for questionJSON in questionJSONList:
+    questionObj = json.loads(questionJSON)
 
-    for message in messages:
-        response = message.content[0].text.value
-        response = json.loads(response)
-
-        newQuestion = Question(questionText=response["questionText"], answerChoices=response["answerChoices"], correctAnswer=response["correctAnswer"])
-        newQuestionList.append(newQuestion)
-
-print(newQuestionList)
+    newQuestion = Question(questionText=questionObj["questionText"], answerChoices=questionObj["answerChoices"], correctAnswer=questionObj["correctAnswer"])
+    newQuestionList.append(newQuestion)
