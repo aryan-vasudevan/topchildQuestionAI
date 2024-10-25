@@ -17,17 +17,15 @@ class Question(BaseModel):
     answerChoices: list[str]
     correctAnswer: str
 
-# Get new question
-def getNewQuestion(sampleQuestion):
-    completion = client.beta.chat.completions.parse(
-        model="gpt-4o-2024-08-06",
-        messages=[{"role": "system", "content": INSTRUCTIONS},
-                  {"role": "user", "content": f"question - {sampleQuestion.questionText} \n answer choices - {sampleQuestion.answerChoices} \n correct answer - {sampleQuestion.correctAnswer}"}],
-        response_format=Question
-    )
+thread = client.beta.threads.create()
 
-    output = completion.choices[0].message.parsed
-    return output
+# Get new question
+def addNewQuestion(sampleQuestion):
+    message = client.beta.threads.messages.create(
+        thread_id=thread.id,
+        role="user",
+        content=f"question - {sampleQuestion.questionText} \n answer choices - {sampleQuestion.answerChoices} \n correct answer - {sampleQuestion.correctAnswer}"
+    )
 
 # Excel file
 path = "questions.xlsx"
@@ -54,16 +52,17 @@ for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
 # Get a new question for each sample question
 for rowNumber, sampleQuestion in enumerate(sampleQuestionList):
     rowNumber += 1
-    newQuestion = getNewQuestion(sampleQuestion)
+    addNewQuestion(sampleQuestion)
 
-    # Write question text
-    sheet2.cell(row=rowNumber, column=1).value = newQuestion.questionText
-    
-    # Write answer choices
-    for i in range(1, 6):
-        sheet2.cell(row=rowNumber, column=i).value = newQuestion.answerChoices[i - 1]
+run = client.beta.threads.runs.create_and_poll(
+  thread_id=thread.id,
+  assistant_id="asst_JvXYRQsCuulfT0rGke7VZA0D",
+)
 
-    # Write correct answer
-    sheet2.cell(row=rowNumber, column=6).value = newQuestion.correctAnswer
-
-wb.save(path)
+if run.status == 'completed': 
+  messages = client.beta.threads.messages.list(
+    thread_id=thread.id
+  )
+  print(messages)
+else:
+  print(run.status)
