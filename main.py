@@ -73,3 +73,18 @@ for questionJSON in questionJSONList:
 
     newQuestion = Question(questionText=questionObj["questionText"], answerChoices=questionObj["answerChoices"], correctAnswer=questionObj["correctAnswer"])
     newQuestionList.append(newQuestion)
+
+for rowNumber, newQuestion in enumerate(newQuestionList):
+    rowNumber += 1
+
+    # Write question text
+    sheet2.cell(row=rowNumber, column=1).value = newQuestion.questionText
+    
+    # Write answer choices
+    for i in range(2, 7):
+        sheet2.cell(row=rowNumber, column=i).value = newQuestion.answerChoices[i - 2]
+
+    # Write correct answer
+    sheet2.cell(row=rowNumber, column=7).value = newQuestion.correctAnswer
+
+wb.save(path)
