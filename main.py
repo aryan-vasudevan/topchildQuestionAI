@@ -1,5 +1,6 @@
 import openpyxl
 import os
+import json
 from openai import OpenAI
 from dotenv import load_dotenv
 from pydantic import BaseModel
@@ -55,16 +56,22 @@ for rowNumber, sampleQuestion in enumerate(sampleQuestionList):
     addNewQuestion(sampleQuestion)
 
 run = client.beta.threads.runs.create_and_poll(
-  thread_id=thread.id,
-  assistant_id="asst_JvXYRQsCuulfT0rGke7VZA0D",
+    thread_id=thread.id,
+    assistant_id="asst_JvXYRQsCuulfT0rGke7VZA0D",
 )
 
-if run.status == 'completed': 
-  messages = list(client.beta.threads.messages.list(
+newQuestionList = []
+if run.status == "completed": 
+    messages = list(client.beta.threads.messages.list(
     thread_id=thread.id,
     run_id=run.id
-  ))
+    ))
 
-  
-  response = messages[0].content[0].text.value
-  newQuestion = Question(questionText=response["questionText"], answerChoices=response["answerChoices"], correctAnswer=response["correctAnswer"])
+    for message in messages:
+        response = message.content[0].text.value
+        response = json.loads(response)
+
+        newQuestion = Question(questionText=response["questionText"], answerChoices=response["answerChoices"], correctAnswer=response["correctAnswer"])
+        newQuestionList.append(newQuestion)
+
+print(newQuestionList)
