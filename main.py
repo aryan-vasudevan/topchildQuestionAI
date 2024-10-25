@@ -64,6 +64,7 @@ if run.status == 'completed':
     thread_id=thread.id,
     run_id=run.id
   ))
-  print(messages[0].content[0].text)
-else:
-  print(run.status)
+
+  
+  response = messages[0].content[0].text.value
+  newQuestion = Question(questionText=response["questionText"], answerChoices=response["answerChoices"], correctAnswer=response["correctAnswer"])
