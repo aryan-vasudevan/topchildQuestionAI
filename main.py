@@ -83,8 +83,6 @@ for questionJSON in questionJSONList:
 for rowNumber, newQuestion in enumerate(newQuestionList):
     rowNumber += 1
 
-    print(newQuestion.explanation)
-
     # Write question text
     sheet2.cell(row=rowNumber, column=1).value = newQuestion.questionText
     
@@ -96,6 +94,6 @@ for rowNumber, newQuestion in enumerate(newQuestionList):
     sheet2.cell(row=rowNumber, column=7).value = newQuestion.correctAnswer
 
     # Write explanation
-    sheet2.cell(row=rowNumber, column=7).value = newQuestion.explanation
+    sheet2.cell(row=rowNumber, column=8).value = newQuestion.explanation
 
 wb.save(path)
