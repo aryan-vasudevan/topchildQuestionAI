@@ -31,7 +31,7 @@ def getNewQuestion(sampleQuestion, questionJSONList):
     message = client.beta.threads.messages.create(
         thread_id=thread.id,
         role="user",
-        content=f"question - {sampleQuestion.questionText} \n answer choices - {sampleQuestion.answerChoices} \n correct answer - {sampleQuestion.correctAnswer}"
+        content=f"question - {sampleQuestion.questionText} \nanswer choices - {sampleQuestion.answerChoices} \n correct answer - {sampleQuestion.correctAnswer}"
     )
 
     run = client.beta.threads.runs.create_and_poll(
