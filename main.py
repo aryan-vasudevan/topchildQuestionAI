@@ -9,6 +9,7 @@ from pydantic import BaseModel
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 INSTRUCTIONS = os.getenv("INSTRUCTIONS")
+ASSISTANT_ID = os.getenv("ASSISSTANT_ID")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -36,7 +37,7 @@ def getNewQuestion(sampleQuestion, questionJSONList):
 
     run = client.beta.threads.runs.create_and_poll(
         thread_id=thread.id,
-        assistant_id="asst_JvXYRQsCuulfT0rGke7VZA0D",
+        assistant_id=ASSISTANT_ID,
     )
 
     if run.status == "completed": 
