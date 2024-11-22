@@ -9,7 +9,7 @@ from pydantic import BaseModel
 load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 INSTRUCTIONS = os.getenv("INSTRUCTIONS")
-ASSISTANT_ID = os.getenv("ASSISSTANT_ID")
+ASSISSTANT_ID = os.getenv("ASSISSTANT_ID")
 
 client = OpenAI(api_key=OPENAI_API_KEY)
 
@@ -37,7 +37,7 @@ def getNewQuestion(sampleQuestion, questionJSONList):
 
     run = client.beta.threads.runs.create_and_poll(
         thread_id=thread.id,
-        assistant_id=ASSISTANT_ID,
+        assistant_id=ASSISSTANT_ID,
     )
 
     if run.status == "completed": 
@@ -55,12 +55,17 @@ wb = openpyxl.load_workbook(path)
 sheet = wb.active
 
 # New question sheet
-wb.create_sheet("Sheet 2")
-sheet2 = wb["Sheet 2"]
+numOfSheets = len(wb.sheetnames)
+wb.create_sheet(f"Sheet {numOfSheets + 1}")
+
+newSheet = wb[f"Sheet {numOfSheets + 1}"]
+
+numRows = len([row for row in sheet if not all([cell.value == None for cell in row])])
+numCols = 8
 
 # Read questions
 sampleQuestionList = []
-for row in sheet.iter_rows(min_row=2, min_col=2, max_row=20, max_col=8):
+for row in sheet.iter_rows(min_row=2, min_col=2, max_row=numRows, max_col=numCols):
     # Read specific cells
     questionText = str(row[0].value)
     answerChoices = [str(cell.value) for cell in row[1:6]]
@@ -85,16 +90,16 @@ for rowNumber, newQuestion in enumerate(newQuestionList):
     rowNumber += 1
 
     # Write question text
-    sheet2.cell(row=rowNumber, column=1).value = newQuestion.questionText
-    
+    newSheet.cell(row=rowNumber, column=1).value = newQuestion.questionText
+    print(newQuestion.questionText)
     # Write answer choices
     for i in range(2, 7):
-        sheet2.cell(row=rowNumber, column=i).value = newQuestion.answerChoices[i - 2]
+        newSheet.cell(row=rowNumber, column=i).value = newQuestion.answerChoices[i - 2]
 
     # Write correct answer
-    sheet2.cell(row=rowNumber, column=7).value = newQuestion.correctAnswer
+    newSheet.cell(row=rowNumber, column=7).value = newQuestion.correctAnswer
 
     # Write explanation
-    sheet2.cell(row=rowNumber, column=8).value = newQuestion.explanation
+    newSheet.cell(row=rowNumber, column=8).value = newQuestion.explanation
 
 wb.save(path)
