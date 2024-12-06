@@ -91,7 +91,7 @@ for rowNumber, newQuestion in enumerate(newQuestionList):
 
     # Write question text
     newSheet.cell(row=rowNumber, column=1).value = newQuestion.questionText
-    print(newQuestion.questionText)
+    
     # Write answer choices
     for i in range(2, 7):
         newSheet.cell(row=rowNumber, column=i).value = newQuestion.answerChoices[i - 2]
